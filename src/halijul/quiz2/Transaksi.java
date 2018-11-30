@@ -5,18 +5,99 @@
  */
 package halijul.quiz2;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Haliza
  */
 public class Transaksi extends javax.swing.JFrame {
-
-    /**
-     * Creates new form Transaksi
-     */
+    private int id = 0;
+    private String code;
+    private DefaultTableModel modelTbl;
+    private modelCombobox modelCombo;
+    private ArrayList<Barang> daftarBrg = new ArrayList<>();
+    
     public Transaksi() {
+        this.modelCombo = new modelCombobox();
+        this.modelCombo.tambahBarang(new Barang("Kopi", 10000));
+        this.modelCombo.tambahBarang(new Barang("Susu", 20000));
+        this.modelCombo.tambahBarang(new Barang("Gula", 15000));
+        
+        modelTabel tableModel = new modelTabel(); 
+        this.modelTbl = new DefaultTableModel(tableModel.getNamakolom(), 0);
+        
         initComponents();
     }
+    
+    private boolean isEmpty() {
+        return this.tabelData.getModel().getRowCount()<=0;
+    }
+    
+    private void cekTabel() {
+        if(isEmpty()) {
+            this.tombolSave.setEnabled(false);
+            this.tombolRemove.setEnabled(false);
+        } else {
+            this.tombolSave.setEnabled(true);
+            this.tombolRemove.setEnabled(true);
+        }
+    }
+    
+    private String getCode() {
+        this.id += 1;
+        String tgl = new SimpleDateFormat("yyMMdd").format(new Date());
+        this.code = String.format(tgl+"%02d", this.id);
+        return this.code;
+    }
+    
+     private Object[] tambahBelanja(String nama, int jumlah) {
+        float harga = 0;
+        Barang[] brg = this.modelCombo.getBarang();
+        for(int i = 0; i < brg.length; i++) {
+            if(nama.equalsIgnoreCase(brg[i].getNama())) {
+                harga = brg[i].getHarga();
+            }
+        } 
+        Object[] obj = {
+          nama,
+          harga,
+          jumlah
+        };
+        return obj;
+    }
+     
+    private boolean isDobel(String nama) {
+        boolean result = false;
+        ArrayList<String> brg = new ArrayList<>();
+        for (int i = 0; i < modelTbl.getRowCount(); i++){
+            brg.add(modelTbl.getValueAt(i, 0).toString());
+        }
+        for(String i : brg) {
+            if(i.equals(nama)) {
+                result = true;
+            } 
+        }
+        return result;
+    } 
+    
+    private void tambahJumlah(String nama, int tambah) {
+        ArrayList<String> brg = new ArrayList<>();
+        for (int i = 0; i < modelTbl.getRowCount(); i++){
+            brg.add(modelTbl.getValueAt(i, 0).toString());
+        }
+        for(int i = 0; i < brg.size(); i++) {
+            if(brg.get(i).equals(nama)) {
+                int jumlah = new Integer(modelTbl.getValueAt(i, 2).toString());
+                modelTbl.setValueAt(jumlah+tambah, i, 2);  
+            } 
+        }
+    } 
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -28,45 +109,72 @@ public class Transaksi extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tabelData = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
+        comboBrg = new JComboBox<Barang>(this.modelCombo.getBarang());
+        textJumlah = new javax.swing.JTextField();
+        textCode = new javax.swing.JTextField();
+        tombolNew = new javax.swing.JButton();
+        tombolRemove = new javax.swing.JButton();
+        tombolAdd = new javax.swing.JButton();
+        tombolCancel = new javax.swing.JButton();
+        tombolSave = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        tabelData.setModel(this.modelTbl);
+        tabelData.setEnabled(false);
+        jScrollPane1.setViewportView(tabelData);
 
         jLabel1.setText("Code");
 
         jLabel2.setText("Item");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        comboBrg.setEnabled(false);
 
-        jButton1.setText("New");
+        textJumlah.setEnabled(false);
 
-        jButton3.setText("Remove");
+        textCode.setEnabled(false);
 
-        jButton4.setText("Add");
+        tombolNew.setText("New");
+        tombolNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tombolNewActionPerformed(evt);
+            }
+        });
 
-        jButton6.setText("Cancel");
+        tombolRemove.setText("Remove");
+        tombolRemove.setEnabled(false);
+        tombolRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tombolRemoveActionPerformed(evt);
+            }
+        });
 
-        jButton7.setText("Save");
+        tombolAdd.setText("Add");
+        tombolAdd.setEnabled(false);
+        tombolAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tombolAddActionPerformed(evt);
+            }
+        });
+
+        tombolCancel.setText("Cancel");
+        tombolCancel.setEnabled(false);
+        tombolCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tombolCancelActionPerformed(evt);
+            }
+        });
+
+        tombolSave.setText("Save");
+        tombolSave.setEnabled(false);
+        tombolSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tombolSaveActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -80,57 +188,141 @@ public class Transaksi extends javax.swing.JFrame {
                             .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(textCode, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(tombolNew, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(comboBrg, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(textJumlah, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(tombolAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(4, 4, 4)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(tombolSave, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(tombolCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jButton3)))))
-                .addGap(101, 101, Short.MAX_VALUE))
+                                .addComponent(tombolRemove)))))
+                .addGap(29, 29, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tombolNew)
+                    .addComponent(textCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
                 .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton4)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(textJumlah, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tombolAdd)
+                    .addComponent(comboBrg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton3)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(tombolRemove)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton7)
-                    .addComponent(jButton6))
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(tombolCancel)
+                    .addComponent(tombolSave))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void tombolNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tombolNewActionPerformed
+        this.textCode.setText(this.getCode());
+        this.tombolNew.setEnabled(false);
+        this.tombolSave.setEnabled(true);
+        this.tombolCancel.setEnabled(true);
+        this.tombolAdd.setEnabled(true);
+        this.tombolRemove.setEnabled(true);
+        this.textJumlah.setEnabled(true);
+        this.textJumlah.setText("1");
+        this.comboBrg.setEnabled(true);
+        this.tabelData.setEnabled(true);
+        this.cekTabel();
+    }//GEN-LAST:event_tombolNewActionPerformed
+
+    private void tombolCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tombolCancelActionPerformed
+        this.textJumlah.setText("");
+        this.textCode.setText("");
+        this.tombolNew.setEnabled(true);
+        this.tombolSave.setEnabled(false);
+        this.tombolCancel.setEnabled(false);
+        this.tombolAdd.setEnabled(false);
+        this.tombolRemove.setEnabled(false);
+        this.textJumlah.setEnabled(false);
+        this.comboBrg.setEnabled(false);
+        this.id -= 1;
+        this.daftarBrg.clear();
+        this.modelTbl.setRowCount(0);
+    }//GEN-LAST:event_tombolCancelActionPerformed
+
+    private void tombolAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tombolAddActionPerformed
+
+        String nama = this.comboBrg.getSelectedItem().toString();
+        int jumlah = new Integer(this.textJumlah.getText());
+        if(isDobel(nama)) {
+            tambahJumlah(nama, jumlah);
+        } else {
+            modelTbl.addRow(tambahBelanja(nama, jumlah));
+        }
+        this.cekTabel();
+    }//GEN-LAST:event_tombolAddActionPerformed
+
+    private void tombolRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tombolRemoveActionPerformed
+         if(tabelData.getSelectedRow()<0) {
+            String text = "Pilih barang yang akan dihapus !";
+            JOptionPane.showMessageDialog(this, text, "Information", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            int count = tabelData.getSelectedRows().length;
+            for(int i = 0; i < count; i++) {
+                modelTbl.removeRow(tabelData.getSelectedRow());
+            }
+        }
+        this.cekTabel();
+    }//GEN-LAST:event_tombolRemoveActionPerformed
+
+    private void tombolSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tombolSaveActionPerformed
+        try {
+            for (int i = 0; i < modelTbl.getRowCount(); i++) {
+                String name = modelTbl.getValueAt(i, 0).toString();
+                float price = new Float(modelTbl.getValueAt(i, 1).toString());
+                int qty = new Integer(modelTbl.getValueAt(i, 2).toString());
+                this.daftarBrg.add(new Barang(name, price, qty));
+            }
+            Struk struk = new Struk(this.code, this.daftarBrg);
+            StringBuilder str = new StringBuilder();
+            str.append(struk.cetakStruk());
+            JOptionPane.showMessageDialog(this, str, "Detil Transaksi", JOptionPane.INFORMATION_MESSAGE);
+            
+            this.textJumlah.setText("");
+            this.textCode.setText("");
+            this.tombolNew.setEnabled(true);
+            this.tombolSave.setEnabled(false);
+            this.tombolCancel.setEnabled(false);
+            this.tombolAdd.setEnabled(false);
+            this.tombolRemove.setEnabled(false);
+            this.textJumlah.setEnabled(false);
+            this.comboBrg.setEnabled(false);
+            this.modelTbl.setRowCount(0);
+            this.daftarBrg.clear();
+            
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }//GEN-LAST:event_tombolSaveActionPerformed
 
     /**
      * @param args the command line arguments
@@ -168,17 +360,17 @@ public class Transaksi extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<Barang> comboBrg;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTable tabelData;
+    private javax.swing.JTextField textCode;
+    private javax.swing.JTextField textJumlah;
+    private javax.swing.JButton tombolAdd;
+    private javax.swing.JButton tombolCancel;
+    private javax.swing.JButton tombolNew;
+    private javax.swing.JButton tombolRemove;
+    private javax.swing.JButton tombolSave;
     // End of variables declaration//GEN-END:variables
 }
